@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Dev Loop"
+  short_description: "Durable Codex workflows for development"
+  default_prompt: "Use $codex-dev-loop to set up a durable development loop for this project."

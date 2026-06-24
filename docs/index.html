@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex Dev Loop</title>
+  <meta name="description" content="A durable development workflow system for Codex desktop.">
+  <style>
+    :root {
+      --ink: #15171a;
+      --muted: #5b6472;
+      --line: #d8dde6;
+      --paper: #ffffff;
+      --wash: #f6f7f9;
+      --accent: #0f766e;
+      --accent-2: #2563eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--wash);
+    }
+    header {
+      min-height: 78vh;
+      display: grid;
+      align-items: center;
+      background:
+        linear-gradient(rgba(8, 20, 32, 0.72), rgba(8, 20, 32, 0.58)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='900' viewBox='0 0 1400 900'%3E%3Crect width='1400' height='900' fill='%23222b35'/%3E%3Cg fill='none' stroke='%2389a2b8' stroke-opacity='.38' stroke-width='2'%3E%3Cpath d='M160 160h380v180H160zM660 130h520v230H660zM260 470h330v210H260zM720 500h430v170H720z'/%3E%3Cpath d='M540 250h120M920 360v140M590 570h130M420 340v130'/%3E%3C/g%3E%3Cg fill='%23f4f7fb' fill-opacity='.86'%3E%3Ccircle cx='160' cy='160' r='8'/%3E%3Ccircle cx='540' cy='250' r='8'/%3E%3Ccircle cx='660' cy='250' r='8'/%3E%3Ccircle cx='920' cy='360' r='8'/%3E%3Ccircle cx='920' cy='500' r='8'/%3E%3Ccircle cx='590' cy='570' r='8'/%3E%3Ccircle cx='720' cy='570' r='8'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: cover;
+      background-position: center;
+      color: white;
+      padding: 48px 24px;
+    }
+    .hero, main { max-width: 1120px; margin: 0 auto; width: 100%; }
+    .hero h1 { font-size: clamp(42px, 8vw, 92px); line-height: .95; margin: 0 0 22px; }
+    .hero p { font-size: 22px; max-width: 760px; line-height: 1.4; margin: 0 0 30px; color: #e6edf5; }
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .button {
+      display: inline-block;
+      border: 1px solid rgba(255,255,255,.55);
+      color: white;
+      text-decoration: none;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: 650;
+    }
+    .button.primary { background: var(--accent); border-color: var(--accent); }
+    main { padding: 36px 24px 64px; }
+    section { margin: 28px 0; }
+    h2 { font-size: 30px; margin: 0 0 14px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    .card h3 { margin: 0 0 8px; }
+    .card p, li { color: var(--muted); line-height: 1.5; }
+    pre {
+      overflow: auto;
+      background: #101827;
+      color: #dbeafe;
+      padding: 18px;
+      border-radius: 8px;
+    }
+    code { font-family: Consolas, monospace; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hero">
+      <h1>Codex Dev Loop</h1>
+      <p>A durable development workflow system for Codex desktop: memory vaults, goal cards, approval queues, automations, and review dashboards.</p>
+      <div class="actions">
+        <a class="button primary" href="https://github.com/scottconverse/codex-dev-loop#quick-install">Get Started</a>
+        <a class="button" href="user-manual.md">Read Manual</a>
+      </div>
+    </div>
+  </header>
+  <main>
+    <section>
+      <h2>What It Does</h2>
+      <div class="grid">
+        <div class="card"><h3>Durable Memory</h3><p>Keep project brief, preferences, decisions, and open loops in a reviewable `.codex-loop/` vault.</p></div>
+        <div class="card"><h3>Strong Goals</h3><p>Turn vague requests into goal cards with scope, constraints, verification, and status.</p></div>
+        <div class="card"><h3>Approval Queue</h3><p>External actions wait for explicit approval: pushes, merges, deploys, messages, and production changes.</p></div>
+        <div class="card"><h3>Review Surfaces</h3><p>Generate dashboards and artifacts so user and Codex can inspect the same object.</p></div>
+      </div>
+    </section>
+    <section>
+      <h2>Install</h2>
+      <pre><code>git clone https://github.com/scottconverse/codex-dev-loop.git
+cd codex-dev-loop
+powershell -ExecutionPolicy Bypass -File .\installers\install.ps1</code></pre>
+    </section>
+    <section>
+      <h2>Use In Codex</h2>
+      <pre><code>Use $codex-dev-loop for this repo. Initialize the dev loop vault.</code></pre>
+    </section>
+  </main>
+</body>
+</html>
