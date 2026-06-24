@@ -1,0 +1,15 @@
+name: pr-babysitter
+description: Watch selected pull requests and prepare one bounded fix when CI or review state changes.
+trigger: Every 15 minutes or thread heartbeat.
+scope: Open PRs labeled agent-watch.
+action: Inspect CI, review comments, and branch freshness; attempt one deterministic local fix when safe.
+verifier: CI is green and no blocking review comments remain.
+budget:
+  max_attempts: 1
+  max_minutes: 5
+  max_files_changed: 10
+  max_consecutive_failures: 1
+stop_condition: CI green, label removed, PR closed, or budget exhausted.
+escalation: Ask before pushing, commenting, rebasing remote branches, merging, or deploying.
+status: proposed
+

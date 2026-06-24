@@ -1,10 +1,10 @@
 # Codex Dev Loop User Manual
 
-Version: 0.1.0
+Version: 0.2.0
 
 ## 1. Purpose
 
-Codex Dev Loop gives development work a durable home. Instead of restarting context every thread, a project gets a `.codex-loop/` vault with goals, decisions, open loops, approvals, runbooks, and review surfaces.
+Codex Dev Loop gives development work a durable home. Instead of restarting context every thread, a project gets a `.codex-loop/` vault with goals, loop specs, run logs, decisions, open loops, approvals, runbooks, and review surfaces.
 
 ## 2. Install
 
@@ -73,6 +73,8 @@ A good goal includes:
 Use the vault as reviewable memory:
 
 - `project-brief.md`: product direction, architecture, repo conventions
+- `loops/`: loop contracts with trigger, action, verifier, budget, stop condition, and escalation
+- `runs/`: per-loop execution logs
 - `preferences.md`: durable user preferences
 - `decisions/`: dated technical and product decisions
 - `open-loops.md`: blockers, follow-ups, waiting items
@@ -80,7 +82,29 @@ Use the vault as reviewable memory:
 - `approval-queue.md`: actions waiting for user approval
 - `inbox/`: raw transcripts, voice notes, and rough context
 
-## 6. Approval Queue
+## 6. Loop Engineering
+
+Create a loop spec for repeated work that has a measurable verifier:
+
+```powershell
+python <skill-dir>\scripts\create_loop.py --target . --name "pr babysitter" --trigger "Every 15 minutes" --action "Inspect PRs labeled agent-watch" --verifier "CI green and no blocking comments" --stop-condition "CI green or budget exhausted"
+```
+
+Record each pass:
+
+```powershell
+python <skill-dir>\scripts\record_loop_run.py --target . --loop pr-babysitter --observed "CI red" --action "Prepared one deterministic fix" --verifier-result failed --next-step "Ask user before push"
+```
+
+Check loop health:
+
+```powershell
+python <skill-dir>\scripts\run_loop_check.py --target .
+```
+
+Every loop should define trigger, scope, action, verifier, budget, stop condition, escalation, and status. Skip loops for one-shot edits, vague exploratory work, and tasks without a cheap verifier.
+
+## 7. Approval Queue
 
 Queue any action that changes external state:
 
@@ -90,7 +114,7 @@ python <skill-dir>\scripts\queue_approval.py --target . --title "push branch" --
 
 Codex should not perform queued actions until the user approves the exact action and target.
 
-## 7. Finalization Check
+## 8. Finalization Check
 
 Before wrapping substantial work, run:
 
@@ -104,7 +128,7 @@ This reports:
 - pending approvals
 - missing required memory files
 
-## 8. Dashboard
+## 9. Dashboard
 
 Generate a local HTML dashboard:
 
@@ -114,7 +138,7 @@ python <skill-dir>\scripts\loop_status.py --target . --html
 
 Open `.codex-loop/dashboard.html` to review current state.
 
-## 9. Automations
+## 10. Automations
 
 Codex desktop supports real recurring automations. Use this system to define the target, cadence, stop condition, and approval boundary.
 
@@ -126,7 +150,7 @@ Use $codex-dev-loop. Watch PR 42 every 30 minutes until CI passes. Prepare fixes
 
 Codex should record the automation in `automation-registry.md`.
 
-## 10. Voice And Transcripts
+## 11. Voice And Transcripts
 
 Save rough notes:
 
@@ -136,12 +160,13 @@ python <skill-dir>\scripts\ingest_transcript.py --target . --source notes.txt --
 
 Then distill the note into decisions, preferences, actions, and open loops.
 
-## 11. Recommended Workflow
+## 12. Recommended Workflow
 
 1. Use a pinned Codex thread per important project.
 2. Initialize `.codex-loop/`.
 3. Create a goal card for substantial work.
-4. Let Codex implement and verify.
-5. Record decisions and open loops.
-6. Queue external actions for approval.
-7. Run finalization check before closing.
+4. Create a loop spec when the work repeats and has a verifier.
+5. Let Codex implement and verify.
+6. Record decisions, runs, and open loops.
+7. Queue external actions for approval.
+8. Run finalization check before closing.

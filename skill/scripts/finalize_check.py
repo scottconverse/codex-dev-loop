@@ -2,6 +2,8 @@ import argparse
 import re
 from pathlib import Path
 
+from loop_utils import loop_files, loop_status, parse_run, read_loop, run_files
+
 
 def read(path: Path) -> str:
     if not path.exists():
@@ -34,6 +36,28 @@ def pending_approvals(vault: Path) -> list[str]:
     return pending
 
 
+def stalled_loops(vault: Path) -> list[str]:
+    found: list[str] = []
+    for path in loop_files(vault):
+        data = read_loop(path)
+        if loop_status(data) == "stalled":
+            found.append(path.name)
+            continue
+        budget = data.get("budget", {})
+        max_failures = 2
+        if isinstance(budget, dict):
+            try:
+                max_failures = int(str(budget.get("max_consecutive_failures", 2)))
+            except ValueError:
+                max_failures = 2
+        recent = [parse_run(p) for p in run_files(vault, str(data.get("name", path.stem)))[:max_failures]]
+        if len(recent) >= max_failures and all(r.get("verifier_result") == "failed" for r in recent):
+            signatures = [r.get("failure_signature", "") for r in recent]
+            if signatures and len(set(signatures)) == 1 and signatures[0] not in ("", "n/a"):
+                found.append(path.name)
+    return sorted(set(found))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Final pre-response check for Codex dev loop memory.")
     parser.add_argument("--target", default=".", help="Project directory containing .codex-loop.")
@@ -50,6 +74,7 @@ def main() -> int:
 
     active = active_goals(vault)
     pending = pending_approvals(vault)
+    stalled = stalled_loops(vault)
 
     print(f"vault: {vault}")
     print(f"active_goals: {len(active)}")
@@ -58,6 +83,9 @@ def main() -> int:
     print(f"pending_approvals: {len(pending)}")
     for approval in pending:
         print(f"- {approval}")
+    print(f"stalled_loops: {len(stalled)}")
+    for loop in stalled:
+        print(f"- {loop}")
 
     if issues:
         print("issues:")

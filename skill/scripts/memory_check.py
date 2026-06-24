@@ -30,7 +30,7 @@ def main() -> int:
         elif not path.read_text(encoding="utf-8").strip():
             issues.append(f"empty file: {rel}")
 
-    for rel in ["goals", "decisions", "runbooks", "inbox"]:
+    for rel in ["goals", "loops", "runs", "decisions", "runbooks", "inbox"]:
         path = vault / rel
         if not path.exists():
             issues.append(f"missing directory: {rel}")

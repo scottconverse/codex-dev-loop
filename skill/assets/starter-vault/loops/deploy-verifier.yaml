@@ -1,0 +1,15 @@
+name: deploy-verifier
+description: Verify a deployment or preview after a push.
+trigger: After deploy starts or every 10 minutes until ready.
+scope: Approved preview or production URLs.
+action: Check endpoint status, expected page content, and smoke paths.
+verifier: Endpoints return expected statuses/content and no obvious regressions appear.
+budget:
+  max_attempts: 6
+  max_minutes: 60
+  max_files_changed: 0
+  max_consecutive_failures: 3
+stop_condition: Deploy healthy, deploy failed, or budget exhausted.
+escalation: Ask before promoting, rolling back, or changing production configuration.
+status: proposed
+

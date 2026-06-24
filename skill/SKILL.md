@@ -1,6 +1,6 @@
 ---
 name: codex-dev-loop
-description: Build and operate a durable Codex development workflow for a repo or project. Use when the user wants smoother development with Codex, persistent project memory, reusable runbooks, approval gates, automation loops, goal cards, release/readiness checks, or a Codex operating system inspired by long-running threads and reviewable memory.
+description: Build and operate a durable Codex development workflow for a repo or project. Use when the user wants smoother development with Codex, persistent project memory, loop engineering, executable loop specs, reusable runbooks, approval gates, automation loops, goal cards, release/readiness checks, or a Codex operating system inspired by long-running threads and reviewable memory.
 ---
 
 # Codex Dev Loop
@@ -25,6 +25,8 @@ Use this directory shape unless the repo already has a comparable system:
   preferences.md
   approval-gates.md
   goals/
+  loops/
+  runs/
   decisions/
   inbox/
   open-loops.md
@@ -53,6 +55,9 @@ python <skill-dir>\scripts\memory_check.py --target .
 python <skill-dir>\scripts\finalize_check.py --target .
 python <skill-dir>\scripts\ingest_transcript.py --target . --source notes.txt
 python <skill-dir>\scripts\queue_approval.py --target . --title "push branch" --action "Push branch feature-x"
+python <skill-dir>\scripts\create_loop.py --target . --name "pr babysitter" --trigger "Every 15 minutes" --action "Inspect PRs labeled agent-watch" --verifier "CI green and no blocking comments" --stop-condition "CI green or budget exhausted"
+python <skill-dir>\scripts\record_loop_run.py --target . --loop pr-babysitter --observed "CI red" --action "Prepared one deterministic fix" --verifier-result failed --next-step "Ask user before push"
+python <skill-dir>\scripts\run_loop_check.py --target .
 ```
 
 ## Goal Cards
@@ -70,6 +75,24 @@ Include:
 
 Prefer strong goals that Codex can verify. Example: "Refactor auth middleware while keeping the public API compatible; done when existing auth tests pass and changed behavior is documented."
 
+## Loop Engineering
+
+Use a loop when work repeats and has a cheap verifier. Do not create loops for one-shot edits, vague exploration, or tasks where only the user can judge done.
+
+Create loop contracts in `loops/YYYY-MM-DD-short-name.yaml`. Include:
+
+- name: stable loop id
+- trigger: schedule, hook, label, file change, or manual start
+- scope: exact sources, labels, files, URLs, or queues in bounds
+- action: what Codex may attempt
+- verifier: objective check that decides done/not done
+- budget: max attempts, minutes, files changed, and consecutive failures
+- stop_condition: when the loop halts
+- escalation: when to ask the user
+- status: proposed, active, paused, stalled, complete, retired
+
+Record every loop pass in `runs/` with `record_loop_run.py`. Use `run_loop_check.py` before starting or continuing unattended loops. If a loop stalls, stop and ask instead of continuing.
+
 ## Memory Rules
 
 Record durable facts only. Do not store noisy transcripts, guesses, secrets, credentials, or private content unrelated to the project.
@@ -81,6 +104,8 @@ Update:
 - `decisions/` when a meaningful technical or product decision is made.
 - `open-loops.md` when something is waiting, blocked, delegated, or needs follow-up.
 - `runbooks/` when a repeatable workflow emerges.
+- `loops/` when a repeatable task has a trigger, verifier, budget, and stop condition.
+- `runs/` when a loop observes state, acts, verifies, stops, or escalates.
 - `automation-registry.md` when a recurring check is proposed, active, paused, or retired.
 - `approval-queue.md` when Codex needs user approval for an external or irreversible action.
 - `inbox/` for raw voice notes, transcripts, screenshots, and rough context that still needs distillation.
@@ -117,6 +142,7 @@ Good runbooks include:
 
 Read `references/loop-patterns.md` when designing a new loop or automation.
 Read `references/automation-playbook.md` when creating or updating recurring wakeups.
+Read `references/loop-engineering.md` when creating or reviewing loop specs.
 Read `references/review-surfaces.md` when building side-panel artifacts, previews, dashboards, or screenshot review flows.
 Read `references/voice-and-transcripts.md` when the user provides raw spoken notes, meeting transcripts, or messy feedback.
 

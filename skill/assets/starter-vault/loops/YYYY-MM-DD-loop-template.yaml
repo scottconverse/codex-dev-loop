@@ -1,0 +1,15 @@
+name: short-loop-name
+description: What repeated task this loop handles.
+trigger: Manual or scheduled trigger.
+scope: Exact queues, labels, files, URLs, or systems in bounds.
+action: What Codex may attempt on each pass.
+verifier: Objective check that decides passed, failed, blocked, or skipped.
+budget:
+  max_attempts: 3
+  max_minutes: 30
+  max_files_changed: 10
+  max_consecutive_failures: 2
+stop_condition: Success condition or budget exhaustion.
+escalation: Ask user before external or irreversible actions.
+status: proposed
+

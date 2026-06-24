@@ -4,6 +4,8 @@ import re
 from datetime import datetime
 from pathlib import Path
 
+from loop_utils import loop_files, loop_status, parse_run, read_loop, run_files
+
 
 def read(path: Path) -> str:
     if not path.exists():
@@ -52,6 +54,37 @@ def count_pending_approvals(vault: Path) -> int:
     return sum(1 for line in text.splitlines() if line.startswith("|") and "pending" in line)
 
 
+def count_loops(paths: list[Path], desired: str | None = None) -> int:
+    count = 0
+    for path in paths:
+        status = loop_status(read_loop(path))
+        if desired is None or status == desired:
+            count += 1
+    return count
+
+
+def count_stalled_loops(vault: Path, paths: list[Path]) -> int:
+    stalled = set()
+    for path in paths:
+        data = read_loop(path)
+        if loop_status(data) == "stalled":
+            stalled.add(path.name)
+            continue
+        budget = data.get("budget", {})
+        max_failures = 2
+        if isinstance(budget, dict):
+            try:
+                max_failures = int(str(budget.get("max_consecutive_failures", 2)))
+            except ValueError:
+                max_failures = 2
+        recent = [parse_run(p) for p in run_files(vault, str(data.get("name", path.stem)))[:max_failures]]
+        if len(recent) >= max_failures and all(r.get("verifier_result") == "failed" for r in recent):
+            signatures = [r.get("failure_signature", "") for r in recent]
+            if signatures and len(set(signatures)) == 1 and signatures[0] not in ("", "n/a"):
+                stalled.add(path.name)
+    return len(stalled)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Summarize a Codex dev loop vault.")
     parser.add_argument("--target", default=".", help="Project directory containing .codex-loop.")
@@ -65,6 +98,8 @@ def main() -> int:
     goals = list_md(vault / "goals")
     decisions = list_md(vault / "decisions")
     runbooks = list_md(vault / "runbooks")
+    loops = loop_files(vault)
+    runs = run_files(vault)
 
     summary = {
         "vault": str(vault),
@@ -73,6 +108,10 @@ def main() -> int:
         "decisions": len([p for p in decisions if "template" not in p.name.lower()]),
         "runbooks": len(runbooks),
         "pending_approvals": count_pending_approvals(vault),
+        "loops": len(loops),
+        "active_loops": count_loops(loops, "active"),
+        "stalled_loops": count_stalled_loops(vault, loops),
+        "runs": len(runs),
     }
 
     for key, value in summary.items():
@@ -88,6 +127,8 @@ def main() -> int:
             f"<header><h1>Codex Dev Loop Dashboard</h1><div class='meta'>{html.escape(datetime.now().isoformat(timespec='seconds'))}</div></header><main>",
             "<div class='grid'>",
             f"<div class='metric {'warn' if summary['active_goals'] else 'ok'}'><strong>{summary['active_goals']}</strong><span>Active goals</span></div>",
+            f"<div class='metric {'warn' if summary['stalled_loops'] else 'ok'}'><strong>{summary['stalled_loops']}</strong><span>Stalled loops</span></div>",
+            f"<div class='metric'><strong>{summary['active_loops']}</strong><span>Active loops</span></div>",
             f"<div class='metric {'warn' if summary['pending_approvals'] else 'ok'}'><strong>{summary['pending_approvals']}</strong><span>Pending approvals</span></div>",
             f"<div class='metric'><strong>{summary['decisions']}</strong><span>Decisions</span></div>",
             f"<div class='metric'><strong>{summary['runbooks']}</strong><span>Runbooks</span></div>",
@@ -106,6 +147,13 @@ def main() -> int:
             parts.append(f"<li><code>{html.escape(path.name)}</code></li>")
         parts.append("</ul></section><section class='panel'><h2>Runbooks</h2><ul>")
         for path in runbooks:
+            parts.append(f"<li><code>{html.escape(path.name)}</code></li>")
+        parts.append("</ul></section><section class='panel'><h2>Loop Specs</h2><ul>")
+        for path in loops[:10]:
+            data = read_loop(path)
+            parts.append(f"<li><code>{html.escape(path.name)}</code> - {html.escape(loop_status(data))}</li>")
+        parts.append("</ul></section><section class='panel'><h2>Recent Runs</h2><ul>")
+        for path in runs[:10]:
             parts.append(f"<li><code>{html.escape(path.name)}</code></li>")
         parts.append("</ul></section></main></body></html>")
         out = vault / "dashboard.html"

@@ -1,0 +1,15 @@
+name: ci-health-clusterer
+description: Cluster failing CI runs by likely root cause so repeated failures become one action.
+trigger: Every 30 minutes or on CI failure notification.
+scope: Recent failing checks for watched branches or PRs.
+action: Fetch failing jobs, group by signature, and prepare a concise root-cause summary.
+verifier: Each failure cluster has a signature, affected runs, likely owner, and next action.
+budget:
+  max_attempts: 1
+  max_minutes: 10
+  max_files_changed: 0
+  max_consecutive_failures: 2
+stop_condition: No failing runs or summary produced.
+escalation: Ask before changing code, posting comments, or retrying workflows.
+status: proposed
+

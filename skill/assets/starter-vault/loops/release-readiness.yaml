@@ -1,0 +1,15 @@
+name: release-readiness
+description: Check whether a release candidate is ready for publication.
+trigger: Before tag, release, or publish.
+scope: Current release candidate.
+action: Run relevant checks, inspect docs, verify install path, and summarize blockers.
+verifier: Zero blockers/criticals, version consistent, install works, docs match behavior.
+budget:
+  max_attempts: 1
+  max_minutes: 45
+  max_files_changed: 0
+  max_consecutive_failures: 1
+stop_condition: Ready, blocked, or explicit user decision.
+escalation: Ask before tag, push, release, deploy, or public post.
+status: proposed
+

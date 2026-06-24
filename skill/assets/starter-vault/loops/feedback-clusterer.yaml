@@ -1,0 +1,15 @@
+name: feedback-clusterer
+description: Cluster incoming feedback and map themes to owning docs, files, or tickets.
+trigger: Every 30 minutes or manual review.
+scope: Approved feedback sources only.
+action: Pull new feedback, group similar items, and suggest owner/artifact per cluster.
+verifier: Each cluster has source count, theme, evidence, proposed owner, and recommended next step.
+budget:
+  max_attempts: 1
+  max_minutes: 15
+  max_files_changed: 0
+  max_consecutive_failures: 2
+stop_condition: No new feedback or clusters summarized.
+escalation: Ask before replying, posting, creating tickets, or changing external systems.
+status: proposed
+

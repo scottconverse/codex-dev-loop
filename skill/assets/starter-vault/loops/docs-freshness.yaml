@@ -1,0 +1,15 @@
+name: docs-freshness
+description: Check whether docs still match shipped behavior.
+trigger: Weekly, before release, or after feature changes.
+scope: README, docs, changelog, public landing pages, and changed feature surfaces.
+action: Compare documented promises to current implementation and public surfaces.
+verifier: No stale commands, broken links, missing version notes, or documented-not-implemented claims.
+budget:
+  max_attempts: 1
+  max_minutes: 20
+  max_files_changed: 5
+  max_consecutive_failures: 2
+stop_condition: Docs pass freshness check or gaps are listed.
+escalation: Ask before publishing docs or changing release notes after release.
+status: proposed
+
